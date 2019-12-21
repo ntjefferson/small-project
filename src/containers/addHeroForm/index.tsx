@@ -5,10 +5,11 @@ import { connect } from "react-redux";
 import { addHero } from "../../redux/hero/actions";
 
 type AppState = {
-    name: string,
-    power: string,
-    powerLevel: number,
-    description: string
+  name: string;
+  power: string;
+  powerLevel: number;
+  description: string;
+  formValidation: boolean;
 };
 
 // exporting unconnected AddHeroForm for testing purposes
@@ -19,7 +20,8 @@ export class AddHeroForm extends Component<any, AppState> {
       name: "",
       power: "",
       powerLevel: 0,
-      description: ""
+      description: "",
+      formValidation: false
     };
   }
 
@@ -30,19 +32,41 @@ export class AddHeroForm extends Component<any, AppState> {
   };
 
   addHero = () => {
-      const { name, power, powerLevel, description } = this.state;
+    const { name, power, powerLevel, description } = this.state;
+    if (!name || !power || !powerLevel) {
+      this.setState({
+        formValidation: true
+      });
+    } else {
       const newHero = {
-          name,
-          power,
-          powerLevel,
-          description
-      }
+        name,
+        power,
+        powerLevel,
+        description
+      };
       this.props.addHero(newHero);
-  }
+      this.setState({ formValidation: false });
+    }
+  };
 
   render() {
+    let errorMessage;
+
+    if (this.state.formValidation) {
+      errorMessage = (
+        <p style={{ color: "red" }}>
+          Name, Power, and Power Level is required (Description optional).
+        </p>
+      );
+    } else {
+      errorMessage = null;
+    }
+
     return (
-      <div className="add-hero-list card shadow rounded p-4 mb-2" data-test="addHeroForm">
+      <div
+        className="add-hero-list card shadow rounded p-4 mb-2"
+        data-test="addHeroForm"
+      >
         <div className="form-group row">
           <div className="col-lg-2">
             <label>Name</label>
@@ -81,9 +105,12 @@ export class AddHeroForm extends Component<any, AppState> {
             />
           </div>
           <div className="col-lg-2" style={{ alignSelf: "flex-end" }}>
-            <button onClick={this.addHero} className="btn btn-primary">Add Hero</button>
+            <button onClick={this.addHero} className="btn btn-primary">
+              Add Hero
+            </button>
           </div>
         </div>
+        {errorMessage}
       </div>
     );
   }
